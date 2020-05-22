@@ -2,8 +2,9 @@ const express = require("express")
 const router = new express.Router()
 const bcrypt = require('bcryptjs')
 const Users = require('../models/users')
+const auth = require('../middleware/auth')
 
-router.get('/', async (req, res) => {
+router.get('/', auth, async (req, res) => {
   const users = await Users.find({})
   res.send(users)
 })
