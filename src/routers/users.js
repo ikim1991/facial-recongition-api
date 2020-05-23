@@ -4,8 +4,8 @@ const bcrypt = require('bcryptjs')
 const Users = require('../models/users')
 const auth = require('../middleware/auth')
 
-router.get('/', auth, async (req, res) => {
-  const users = await Users.find({})
+router.post('/user', auth, async (req, res) => {
+  const users = await Users.findOne({ _id: req.user._id, email: req.user.email })
   res.send(users)
 })
 
@@ -15,7 +15,7 @@ router.post('/signin', async (req, res) => {
     const token = await user.generateAuthToken()
     res.send({user, token})
   } catch(error){
-    res.status(400).send()
+    res.status(400).send({error: 'Username and Password not Found...'})
   }
 })
 
