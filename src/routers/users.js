@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs')
 const Users = require('../models/users')
 const auth = require('../middleware/auth')
 
-router.post('/user', auth, async (req, res) => {
+router.get('/user', auth, async (req, res) => {
   const users = await Users.findOne({ _id: req.user._id, email: req.user.email })
   res.send(users)
 })
@@ -31,21 +31,25 @@ router.post('/register', async (req, res) => {
   }
 })
 
-router.get("/profile/:id", (req, res) => {
-  const _id = req.params.id
-  const user = database.users.find(user => user.id == _id)
-  if(user){
-    return res.send(user)
+router.post("/logout", auth, async (req, res) => {
+  try{
+    req.user.tokens = req.user.tokens.filter((token) => {
+      return token.token !== req.token
+    })
+    await req.user.save()
+    res.send({})
+  } catch(error){
+    res.status(500).send()
   }
-  res.status(404).send({error: "User Not Found..."})
 })
 
-router.put("/image", (req, res) => {
-  const _id = req.body.id
-  const user = database.users.find(user => user.id == _id)
-  if(user){
-    user.entries++
-    return res.send(user)
+router.put("/image", auth, async (req, res) => {
+  console.log(req.user)
+  if(req.user){
+    req.user.entries++
+    console.log(req.user.entries)
+    await req.user.save()
+    return res.send(req.user)
   }
   res.status(404).send({error: "User Not Found..."})
 })
